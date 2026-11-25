@@ -1,4 +1,4 @@
-import { formatCompactNaira, formatNaira } from '../src/lib/money';
+import { divideRoundHalfUp, formatCompactNaira, formatNaira } from '../src/lib/money';
 
 describe('formatNaira', () => {
   it.each([
@@ -31,11 +31,32 @@ describe('formatCompactNaira', () => {
     [100_500, '₦1.01K'], // ₦1,005: half rounds up (was ₦1K with decimal maths)
     [-100_500, '-₦1.01K'],
     [100_499, '₦1K'], // just under half rounds down
+    [100_000_000_000_000, '₦1000B'], // ₦1 trillion: must not overflow (no T unit)
   ])('formats %i kobo as %s', (kobo, expected) => {
     expect(formatCompactNaira(kobo)).toBe(expected);
   });
 
   it('rejects a fraction of a kobo', () => {
     expect(() => formatCompactNaira(10.5)).toThrow(RangeError);
+  });
+});
+
+
+describe('divideRoundHalfUp', () => {
+  it.each([
+    [5, 2, 3], // 2.5 → 3 (half rounds up)
+    [7, 3, 2], // 2.33 → 2
+    [8, 4, 2], // exact
+    [0, 7, 0],
+  ])('%i ÷ %i rounds to %i', (numerator, denominator, expected) => {
+    expect(divideRoundHalfUp(numerator, denominator)).toBe(expected);
+  });
+  
+  it.each([
+    [Number.MAX_SAFE_INTEGER + 1, 2, 'numerator too large to be exact'],
+    [5, 0, 'division by zero'],
+    [-1, 2, 'negative numerator'],
+  ])('rejects %p ÷ %p (%s)', (numerator, denominator) => {
+    expect(() => divideRoundHalfUp(numerator, denominator)).toThrow(RangeError);
   });
 });

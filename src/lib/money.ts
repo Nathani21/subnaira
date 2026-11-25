@@ -37,8 +37,21 @@ const UNITS: [number, string][] = [
 /**
  * Divides two non-negative whole numbers and rounds halves up, using only
  * whole-number arithmetic so no decimal error can creep in.
+ *
+ * @param numerator - Whole number, zero or more.
+ * @param denominator - Whole number, more than zero.
+ * @returns The rounded quotient, e.g. 5 / 2 → 3 and 7 / 3 → 2.
+ * @throws RangeError if the numerator is negative, the denominator is not positive, or either is not a
+ * safe integer (above 9,007,199,254,740,991 JavaScript numbers can't hold every whole number exactly,
+ * so the answer could be silently wrong).
  */
-function divideRoundHalfUp(numerator: number, denominator: number): number {
+export function divideRoundHalfUp(numerator: number, denominator: number): number {
+  if (!Number.isSafeInteger(numerator) || numerator < 0) {
+    throw new RangeError('Numerator must be a whole number from 0 up to Number.MAX_SAFE_INTEGER');
+  }
+  if (!Number.isSafeInteger(denominator) || denominator <= 0) {
+    throw new RangeError('Denominator must be a whole number from 1 up to Number.MAX_SAFE_INTEGER');
+  }
   let quotient = Math.floor(numerator / denominator);
   let remainder = numerator - quotient * denominator;
   // Correct the rare case where floating-point division lands one off.
@@ -82,11 +95,11 @@ export function formatCompactNaira(amountKobo: number): string {
     index -= 1;
   }
   // Hundredths of the unit, e.g. 100,500 kobo → 101 hundredths of ₦1K → "1.01".
-  let hundredths = divideRoundHalfUp(abs * 100, UNITS[index][0]);
+  let hundredths = divideRoundHalfUp(abs, UNITS[index][0] / 100);
   // ₦999,999 rounds to "1000K"; move up to the next unit so it reads "1M".
   if (hundredths >= 100_000 && index < UNITS.length - 1) {
     index += 1;
-    hundredths = divideRoundHalfUp(abs * 100, UNITS[index][0]);
+    hundredths = divideRoundHalfUp(abs, UNITS[index][0] / 100);
   }
   const sign = amountKobo < 0 ? '-' : '';
   return `${sign}${NAIRA}${hundredthsToText(hundredths)}${UNITS[index][1]}`;
