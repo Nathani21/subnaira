@@ -27,20 +27,45 @@ export function formatNaira(amountKobo: number): string {
   return `${sign}${NAIRA}${groupThousands(String(naira))}.${String(kobo).padStart(2, '0')}`;
 }
 
-/** Thresholds for the compact form, smallest first. */
+/** Compact units in kobo, smallest first: ₦1K = 100,000 kobo. */
 const UNITS: [number, string][] = [
-  [1_000, 'K'],
-  [1_000_000, 'M'],
-  [1_000_000_000, 'B'],
+  [100_000, 'K'],
+  [100_000_000, 'M'],
+  [100_000_000_000, 'B'],
 ];
 
-function trimDecimals(value: number): string {
-  return value.toFixed(2).replace(/\.?0+$/, '');
+/**
+ * Divides two non-negative whole numbers and rounds halves up, using only
+ * whole-number arithmetic so no decimal error can creep in.
+ */
+function divideRoundHalfUp(numerator: number, denominator: number): number {
+  let quotient = Math.floor(numerator / denominator);
+  let remainder = numerator - quotient * denominator;
+  // Correct the rare case where floating-point division lands one off.
+  if (remainder < 0) {
+    quotient -= 1;
+    remainder += denominator;
+  } else if (remainder >= denominator) {
+    quotient += 1;
+    remainder -= denominator;
+  }
+  return remainder * 2 >= denominator ? quotient + 1 : quotient;
+}
+
+/** Turns hundredths into "1", "1.5" or "1.23" (no trailing zeros). */
+function hundredthsToText(hundredths: number): string {
+  const whole = Math.floor(hundredths / 100);
+  const fraction = hundredths % 100;
+  if (fraction === 0) {
+    return String(whole);
+  }
+  return `${whole}.${String(fraction).padStart(2, '0').replace(/0$/, '')}`;
 }
 
 /**
  * Formats an amount in kobo in a short form for tight spaces, for example
  * 150000 → "₦1.5K" and 123456700 → "₦1.23M". Amounts under ₦1,000 use the exact form.
+ * Rounds halves up, using whole-number arithmetic on kobo.
  *
  * @param amountKobo - Whole number of kobo. Negative amounts get a leading minus.
  * @returns The short form, with at most two decimals and no trailing zeros.
@@ -48,20 +73,21 @@ function trimDecimals(value: number): string {
  */
 export function formatCompactNaira(amountKobo: number): string {
   assertKobo(amountKobo);
-  const naira = Math.abs(amountKobo) / 100;
-  if (naira < UNITS[0][0]) {
+  const abs = Math.abs(amountKobo);
+  if (abs < UNITS[0][0]) {
     return formatNaira(amountKobo);
   }
   let index = UNITS.length - 1;
-  while (naira < UNITS[index][0]) {
+  while (abs < UNITS[index][0]) {
     index -= 1;
   }
-  let rounded = Math.round((naira / UNITS[index][0]) * 100) / 100;
-  // 999,999 rounds to "1000K"; move up to the next unit so it reads "1M".
-  if (rounded >= 1000 && index < UNITS.length - 1) {
+  // Hundredths of the unit, e.g. 100,500 kobo → 101 hundredths of ₦1K → "1.01".
+  let hundredths = divideRoundHalfUp(abs * 100, UNITS[index][0]);
+  // ₦999,999 rounds to "1000K"; move up to the next unit so it reads "1M".
+  if (hundredths >= 100_000 && index < UNITS.length - 1) {
     index += 1;
-    rounded = Math.round((naira / UNITS[index][0]) * 100) / 100;
+    hundredths = divideRoundHalfUp(abs * 100, UNITS[index][0]);
   }
   const sign = amountKobo < 0 ? '-' : '';
-  return `${sign}${NAIRA}${trimDecimals(rounded)}${UNITS[index][1]}`;
+  return `${sign}${NAIRA}${hundredthsToText(hundredths)}${UNITS[index][1]}`;
 }

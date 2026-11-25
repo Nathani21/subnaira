@@ -28,6 +28,9 @@ describe('formatCompactNaira', () => {
     [99_999_900, '₦1M'], // ₦999,999 would round to "1000K"; moves up to M
     [250_000_000_000, '₦2.5B'],
     [-150_000, '-₦1.5K'],
+    [100_500, '₦1.01K'], // ₦1,005: half rounds up (was ₦1K with decimal maths)
+    [-100_500, '-₦1.01K'],
+    [100_499, '₦1K'], // just under half rounds down
   ])('formats %i kobo as %s', (kobo, expected) => {
     expect(formatCompactNaira(kobo)).toBe(expected);
   });
