@@ -37,8 +37,12 @@ const UNITS: [number, string][] = [
 /**
  * Divides two non-negative whole numbers and rounds halves up, using only
  * whole-number arithmetic so no decimal error can creep in.
+ *
+ * @param numerator - Whole number, zero or more.
+ * @param denominator - Whole number, more than zero.
+ * @returns The rounded quotient, e.g. 5 / 2 → 3 and 7 / 3 → 2.
  */
-function divideRoundHalfUp(numerator: number, denominator: number): number {
+export function divideRoundHalfUp(numerator: number, denominator: number): number {
   let quotient = Math.floor(numerator / denominator);
   let remainder = numerator - quotient * denominator;
   // Correct the rare case where floating-point division lands one off.

@@ -1,4 +1,4 @@
-import { formatCompactNaira, formatNaira } from '../src/lib/money';
+import { divideRoundHalfUp, formatCompactNaira, formatNaira } from '../src/lib/money';
 
 describe('formatNaira', () => {
   it.each([
@@ -37,5 +37,17 @@ describe('formatCompactNaira', () => {
 
   it('rejects a fraction of a kobo', () => {
     expect(() => formatCompactNaira(10.5)).toThrow(RangeError);
+  });
+});
+
+
+describe('divideRoundHalfUp', () => {
+  it.each([
+    [5, 2, 3], // 2.5 → 3 (half rounds up)
+    [7, 3, 2], // 2.33 → 2
+    [8, 4, 2], // exact
+    [0, 7, 0],
+  ])('%i ÷ %i rounds to %i', (numerator, denominator, expected) => {
+    expect(divideRoundHalfUp(numerator, denominator)).toBe(expected);
   });
 });
