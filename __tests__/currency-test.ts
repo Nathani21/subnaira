@@ -18,6 +18,7 @@ describe('usdToKobo', () => {
     [100, 0, 'zero rate'],
     [100, -5, 'negative rate'],
     [100, 1.5, 'fraction of a kobo in the rate'],
+    [200_000_000_001, 155_050, 'too large to convert exactly'],
   ])('rejects %p cents at %p kobo/$ (%s)', (cents, rate) => {
     expect(() => usdToKobo(cents, rate)).toThrow(RangeError);
   });

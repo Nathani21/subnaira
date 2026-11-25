@@ -9,7 +9,8 @@ export type Currency = 'NGN' | 'USD';
  * @param amountCents - The charge in US cents (whole number, zero or more). $15.49 = 1549.
  * @param rateKoboPerDollar - Naira per dollar, in kobo (whole number, more than zero). ₦1,550.50 = 155050.
  * @returns The amount in kobo, rounded to the nearest kobo (halves round up).
- * @throws RangeError if either value is not a whole number, the amount is negative or the rate is not positive.
+ * @throws RangeError if either value is not a whole number, the amount is negative, the rate is not positive,
+ * or the amount is too large to convert exactly (about $580 million at ₦1,550/$; no real subscription is near this).
  */
 export function usdToKobo(amountCents: number, rateKoboPerDollar: number): number {
   if (!Number.isInteger(amountCents) || amountCents < 0) {

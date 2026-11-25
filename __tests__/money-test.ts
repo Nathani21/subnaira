@@ -50,4 +50,12 @@ describe('divideRoundHalfUp', () => {
   ])('%i ÷ %i rounds to %i', (numerator, denominator, expected) => {
     expect(divideRoundHalfUp(numerator, denominator)).toBe(expected);
   });
+  
+  it.each([
+    [Number.MAX_SAFE_INTEGER + 1, 2, 'numerator too large to be exact'],
+    [5, 0, 'division by zero'],
+    [-1, 2, 'negative numerator'],
+  ])('rejects %p ÷ %p (%s)', (numerator, denominator) => {
+    expect(() => divideRoundHalfUp(numerator, denominator)).toThrow(RangeError);
+  });
 });
