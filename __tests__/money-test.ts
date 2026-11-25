@@ -31,6 +31,7 @@ describe('formatCompactNaira', () => {
     [100_500, '₦1.01K'], // ₦1,005: half rounds up (was ₦1K with decimal maths)
     [-100_500, '-₦1.01K'],
     [100_499, '₦1K'], // just under half rounds down
+    [100_000_000_000_000, '₦1000B'], // ₦1 trillion: must not overflow (no T unit)
   ])('formats %i kobo as %s', (kobo, expected) => {
     expect(formatCompactNaira(kobo)).toBe(expected);
   });

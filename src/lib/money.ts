@@ -95,11 +95,11 @@ export function formatCompactNaira(amountKobo: number): string {
     index -= 1;
   }
   // Hundredths of the unit, e.g. 100,500 kobo → 101 hundredths of ₦1K → "1.01".
-  let hundredths = divideRoundHalfUp(abs * 100, UNITS[index][0]);
+  let hundredths = divideRoundHalfUp(abs, UNITS[index][0] / 100);
   // ₦999,999 rounds to "1000K"; move up to the next unit so it reads "1M".
   if (hundredths >= 100_000 && index < UNITS.length - 1) {
     index += 1;
-    hundredths = divideRoundHalfUp(abs * 100, UNITS[index][0]);
+    hundredths = divideRoundHalfUp(abs, UNITS[index][0] / 100);
   }
   const sign = amountKobo < 0 ? '-' : '';
   return `${sign}${NAIRA}${hundredthsToText(hundredths)}${UNITS[index][1]}`;
