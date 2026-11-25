@@ -1,9 +1,9 @@
 import {
-    emptySavedData,
-    MAX_NAME_LENGTH,
-    parseSavedData,
-    type SavedData,
-    serializeSavedData,
+  emptySavedData,
+  MAX_NAME_LENGTH,
+  parseSavedData,
+  type SavedData,
+  serializeSavedData,
 } from '../src/lib/subscriptions';
 
 const netflix = {
@@ -55,6 +55,7 @@ describe('parseSavedData', () => {
     ['not JSON', 'oops'],
     ['not an object', '[]'],
     ['unknown version', saved({ version: 2 })],
+    ['version that is an object', saved({ version: { toString: null } })],
     ['zero exchange rate', saved({ rateKoboPerDollar: 0 })],
     ['fractional exchange rate', saved({ rateKoboPerDollar: 1550.5 })],
     ['subscriptions not a list', saved({ subscriptions: {} })],

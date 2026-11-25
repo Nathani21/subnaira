@@ -92,7 +92,9 @@ export function parseSavedData(json: string | null): SavedData {
     throw new RangeError('Saved data is not an object');
   }
   if (raw.version !== 1) {
-    throw new RangeError(`Saved data has unknown version ${String(raw.version)}`);
+    // Only numbers are shown: String() on an object from JSON can itself throw a TypeError.
+    const shown = typeof raw.version === 'number' ? ` ${raw.version}` : '';
+    throw new RangeError(`Saved data has an unknown version${shown}`);
   }
   const rate = raw.rateKoboPerDollar;
   if (rate !== null && (typeof rate !== 'number' || !Number.isSafeInteger(rate) || rate <= 0)) {
