@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+tone_instructions: "Explain the why behind each suggestion. The author is learning, so keep it clear and concrete."
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!**/*.png"
+    - "!package-lock.json"
+  path_instructions:
+    - path: "src/lib/**"
+      instructions: >-
+        Pure logic. Must not import React, React Native or Expo. Money is always an
+        integer number of kobo (never naira with decimals). Every exported function
+        needs a TSDoc comment and tests in __tests__/.
+    - path: "__tests__/**"
+      instructions: >-
+        Test files must end in -test.ts or -test.tsx so the jest-expo preset finds them.
+        Check edge cases: zero, invalid input, rounding.
+    - path: "src/app/**"
+      instructions: >-
+        UI only. Calculations belong in src/lib, not in screens or components.
+    - path: ".github/workflows/**"
+      instructions: >-
+        The job must stay named "test", because branch protection requires that check.
+
+chat:
+  auto_reply: true
