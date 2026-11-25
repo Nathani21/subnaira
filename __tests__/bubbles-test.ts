@@ -120,6 +120,30 @@ describe('layoutBubbles', () => {
     expect(() => layoutBubbles([{ id: 'a', monthlyKobo: 100 }], 360, 360, options)).toThrow(RangeError);
   });
 
+  it('rejects an area too small for the gaps alone', () => {
+    const items = [
+      { id: 'a', monthlyKobo: 100 },
+      { id: 'b', monthlyKobo: 100 },
+    ];
+    expect(() => layoutBubbles(items, 1, 1)).toThrow(RangeError);
+  });
+
+  it('gives each item its own bubble even when two share an id', () => {
+    const [first, second] = layoutBubbles(
+      [
+        { id: 'same', monthlyKobo: 500_000 },
+        { id: 'same', monthlyKobo: 500_000 },
+      ],
+      360,
+      360,
+    );
+    expect(first.id).toBe('same');
+    expect(second.id).toBe('same');
+    expect(Math.hypot(first.x - second.x, first.y - second.y)).toBeGreaterThanOrEqual(
+      first.r + second.r + GAP - TOLERANCE,
+    );
+  });
+
   it('accepts a zero gap and zero minimum radius', () => {
     const bubbles = layoutBubbles(
       [

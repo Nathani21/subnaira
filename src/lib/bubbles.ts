@@ -2,7 +2,7 @@ import { packEnclose, packSiblings } from 'd3-hierarchy';
 
 /** One subscription to draw as a bubble. */
 export interface BubbleInput {
-  /** Identifies the subscription, so the screen can match bubbles back to data. */
+  /** Identifies the subscription, so the screen can match bubbles back to data. Copied to the output as-is. */
   id: string;
   /** Monthly cost in kobo (from `monthlyCost`), so every billing cycle compares fairly. */
   monthlyKobo: number;
@@ -27,16 +27,17 @@ export interface BubbleOptions {
 }
 
 interface Circle {
-  id: string;
+  /** Position of the item in the caller's list, so duplicate ids can't collide. */
+  index: number;
   r: number;
   x: number;
   y: number;
 }
 
 /** Packs circles with the given radii (plus half the gap each) and returns them with their enclosing circle. */
-function pack(items: { id: string; base: number }[], scale: number, minRadius: number, gap: number) {
+function pack(items: { index: number; base: number }[], scale: number, minRadius: number, gap: number) {
   const circles: Circle[] = items.map((item) => ({
-    id: item.id,
+    index: item.index,
     r: Math.max(item.base * scale, minRadius) + gap / 2,
     x: 0,
     y: 0,
@@ -58,9 +59,9 @@ function pack(items: { id: string; base: number }[], scale: number, minRadius: n
  * @param width - Width of the drawing area.
  * @param height - Height of the drawing area.
  * @param options - Minimum radius and gap.
- * @returns One bubble per item (same order as `items`), all inside the area.
+ * @returns One bubble per item (same order as `items`, even if two items share an id), all inside the area.
  * @throws RangeError if a cost is negative or not a whole number, the area is not positive and finite,
- * or `minRadius` or `gap` is negative or not finite.
+ * `minRadius` or `gap` is negative or not finite, or the area is too small to fit the gaps between bubbles.
  */
 export function layoutBubbles(
   items: BubbleInput[],
@@ -87,7 +88,7 @@ export function layoutBubbles(
 
   // Biggest first, so the largest bubbles sit near the middle.
   const sorted = items
-    .map((item) => ({ id: item.id, base: Math.sqrt(item.monthlyKobo) }))
+    .map((item, index) => ({ index, base: Math.sqrt(item.monthlyKobo) }))
     .sort((a, b) => b.base - a.base);
   const maxBase = sorted[0].base;
   const limit = Math.min(width, height) / 2;
@@ -115,6 +116,10 @@ export function layoutBubbles(
     let small = 0;
     let large = minRadius;
     best = pack(sorted, 0, 0, gap);
+    if (best.enclosure.r > limit) {
+      // Even the gaps alone don't fit.
+      throw new RangeError('The area is too small to fit these bubbles with the gap between them');
+    }
     for (let step = 0; step < 40; step += 1) {
       const middle = (small + large) / 2;
       const attempt = pack(sorted, 0, middle, gap);
@@ -128,16 +133,14 @@ export function layoutBubbles(
   }
 
   const { circles, enclosure } = best;
-  const byId = new Map(
-    circles.map((circle) => [
-      circle.id,
-      {
-        id: circle.id,
-        x: width / 2 + (circle.x - enclosure.x),
-        y: height / 2 + (circle.y - enclosure.y),
-        r: Math.max(circle.r - gap / 2, 0),
-      },
-    ]),
-  );
-  return items.map((item) => byId.get(item.id) as Bubble);
+  const placed: Bubble[] = new Array(items.length);
+  for (const circle of circles) {
+    placed[circle.index] = {
+      id: items[circle.index].id,
+      x: width / 2 + (circle.x - enclosure.x),
+      y: height / 2 + (circle.y - enclosure.y),
+      r: Math.max(circle.r - gap / 2, 0),
+    };
+  }
+  return placed;
 }
