@@ -21,14 +21,21 @@ describe('nextChargeDate', () => {
     expect(nextChargeDate(first, cycle, today)).toBe(expected);
   });
 
-  it.each(['2026-02-30', '2026-13-01', '26-1-1', '2026-1-5'])('rejects the invalid date %s', (bad) => {
-    expect(() => nextChargeDate(bad, 'monthly', '2026-01-01')).toThrow(RangeError);
-  });
+  it.each(['2026-02-30', '2026-13-01', '26-1-1', '2026-1-5', '0099-12-31', '1899-12-31'])(
+    'rejects the invalid date %s',
+    (bad) => {
+      expect(() => nextChargeDate(bad, 'monthly', '2026-01-01')).toThrow(RangeError);
+    },
+  );
 });
 
 describe('toIsoDate', () => {
   it('uses the local calendar date, not UTC', () => {
     // 12:30am on 5 January local time is still 4 January in UTC when the phone is in Lagos.
     expect(toIsoDate(new Date(2026, 0, 5, 0, 30))).toBe('2026-01-05');
+  });
+
+  it('rejects an invalid Date', () => {
+    expect(() => toIsoDate(new Date(Number.NaN))).toThrow(RangeError);
   });
 });

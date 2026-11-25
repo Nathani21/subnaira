@@ -14,6 +14,9 @@ const MONTHS_PER_CYCLE: Record<Exclude<BillingCycle, 'weekly'>, number> = {
 
 const MS_PER_DAY = 86_400_000;
 
+/** Earliest year accepted. Anything earlier is a typo, not a real subscription. */
+const MIN_YEAR = 1900;
+
 function daysInMonth(year: number, month: number): number {
   // Day 0 of the next month is the last day of this month. month is 1-12.
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
@@ -25,6 +28,11 @@ function parse(date: IsoDate): [number, number, number] {
     throw new RangeError(`Date must look like YYYY-MM-DD, got "${date}"`);
   }
   const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  // Date.UTC treats years 0-99 as 1900-1999, so very old years would give wrong answers.
+  // No subscription is that old: reject them instead of supporting them.
+  if (year < MIN_YEAR) {
+    throw new RangeError(`"${date}" is before ${MIN_YEAR}`);
+  }
   if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) {
     throw new RangeError(`"${date}" is not a real date`);
   }
@@ -47,8 +55,12 @@ function dayNumber(year: number, month: number, day: number): number {
  *
  * @param date - Any JavaScript Date, usually `new Date()`.
  * @returns The local calendar date as "YYYY-MM-DD".
+ * @throws RangeError if the Date is invalid (for example `new Date('nonsense')`).
  */
 export function toIsoDate(date: Date): IsoDate {
+  if (!Number.isFinite(date.getTime())) {
+    throw new RangeError('Date is invalid');
+  }
   return format(date.getFullYear(), date.getMonth() + 1, date.getDate());
 }
 
@@ -63,7 +75,7 @@ export function toIsoDate(date: Date): IsoDate {
  * @param cycle - How often it repeats.
  * @param today - Today's date, "YYYY-MM-DD" (pass it in so the function is testable).
  * @returns The first charge date that is today or later. If today is a charge day, returns today.
- * @throws RangeError if either date is not a real "YYYY-MM-DD" date.
+ * @throws RangeError if either date is not a real "YYYY-MM-DD" date, or is before 1900.
  */
 export function nextChargeDate(firstCharge: IsoDate, cycle: BillingCycle, today: IsoDate): IsoDate {
   const [fy, fm, fd] = parse(firstCharge);
