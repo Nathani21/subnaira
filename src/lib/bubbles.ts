@@ -59,7 +59,8 @@ function pack(items: { id: string; base: number }[], scale: number, minRadius: n
  * @param height - Height of the drawing area.
  * @param options - Minimum radius and gap.
  * @returns One bubble per item (same order as `items`), all inside the area.
- * @throws RangeError if a cost is negative or not a whole number, or the area is not positive.
+ * @throws RangeError if a cost is negative or not a whole number, the area is not positive and finite,
+ * or `minRadius` or `gap` is negative or not finite.
  */
 export function layoutBubbles(
   items: BubbleInput[],
@@ -69,8 +70,11 @@ export function layoutBubbles(
 ): Bubble[] {
   const minRadius = options.minRadius ?? 22;
   const gap = options.gap ?? 4;
-  if (!(width > 0) || !(height > 0)) {
-    throw new RangeError('Width and height must be positive');
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    throw new RangeError('Width and height must be positive, finite numbers');
+  }
+  if (!Number.isFinite(minRadius) || minRadius < 0 || !Number.isFinite(gap) || gap < 0) {
+    throw new RangeError('minRadius and gap must be finite numbers, zero or more');
   }
   for (const item of items) {
     if (!Number.isInteger(item.monthlyKobo) || item.monthlyKobo < 0) {

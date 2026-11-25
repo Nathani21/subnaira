@@ -106,7 +106,31 @@ describe('layoutBubbles', () => {
     [[{ id: 'a', monthlyKobo: -1 }], 360, 'negative cost'],
     [[{ id: 'a', monthlyKobo: 1.5 }], 360, 'fraction of a kobo'],
     [[], 0, 'zero-width area'],
+    [[], Number.POSITIVE_INFINITY, 'infinite width'],
   ])('rejects %j at width %p (%s)', (items, width) => {
     expect(() => layoutBubbles(items, width, 360)).toThrow(RangeError);
+  });
+
+  it.each([
+    [{ gap: -4 }, 'negative gap'],
+    [{ gap: Number.NaN }, 'gap that is not a number'],
+    [{ minRadius: -1 }, 'negative minimum radius'],
+    [{ minRadius: Number.POSITIVE_INFINITY }, 'infinite minimum radius'],
+  ])('rejects the option %j (%s)', (options) => {
+    expect(() => layoutBubbles([{ id: 'a', monthlyKobo: 100 }], 360, 360, options)).toThrow(RangeError);
+  });
+
+  it('accepts a zero gap and zero minimum radius', () => {
+    const bubbles = layoutBubbles(
+      [
+        { id: 'a', monthlyKobo: 500_000 },
+        { id: 'b', monthlyKobo: 500_000 },
+      ],
+      360,
+      360,
+      { gap: 0, minRadius: 0 },
+    );
+    const [a, b] = bubbles;
+    expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThanOrEqual(a.r + b.r - TOLERANCE);
   });
 });
