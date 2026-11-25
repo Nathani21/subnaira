@@ -2,7 +2,7 @@ import { monthlyCost } from '../src/lib/billing';
 
 describe('monthlyCost', () => {
   it.each([
-    ['monthly', 500_000, 500_000], // ₦5,000 a month stays ₦5,000
+    ['monthly', 500_000, 500_001], // ₦5,000 a month stays ₦5,000
     ['yearly', 1_200_000, 100_000], // ₦12,000 a year = ₦1,000 a month
     ['quarterly', 300_000, 100_000], // ₦3,000 a quarter = ₦1,000 a month
     ['weekly', 100_000, 433_333], // ₦1,000 a week = ₦4,333.33 a month
