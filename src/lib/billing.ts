@@ -1,3 +1,5 @@
+import { divideRoundHalfUp } from './money';
+
 /** How often a subscription renews. */
 export type BillingCycle = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
@@ -17,13 +19,14 @@ const PER_MONTH: Record<BillingCycle, [number, number]> = {
  *
  * @param amountKobo - The charge in kobo (whole number, never negative). ₦5,000 = 500000.
  * @param cycle - How often the charge repeats.
- * @returns The monthly cost in kobo, rounded to the nearest kobo.
- * @throws RangeError if the amount is negative or not a whole number of kobo.
+ * @returns The monthly cost in kobo, rounded to the nearest kobo (halves round up).
+ * @throws RangeError if the amount is negative, not a whole number of kobo, or too large to
+ * convert exactly (above about ₦1.7 trillion per weekly charge; no real subscription is near this).
  */
 export function monthlyCost(amountKobo: number, cycle: BillingCycle): number {
   if (!Number.isInteger(amountKobo) || amountKobo < 0) {
     throw new RangeError('Amount must be a whole, non-negative number of kobo');
   }
   const [numerator, denominator] = PER_MONTH[cycle];
-  return Math.round((amountKobo * numerator) / denominator);
+  return divideRoundHalfUp(amountKobo * numerator, denominator);
 }

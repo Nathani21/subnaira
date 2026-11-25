@@ -26,3 +26,16 @@ describe('monthlyCost', () => {
     expect(() => monthlyCost(10.5, 'monthly')).toThrow(RangeError);
   });
 });
+
+
+  it('rounds an exact half up', () => {
+    expect(monthlyCost(6, 'yearly')).toBe(1); // 0.5 kobo → 1
+  });
+
+  it('handles the largest safe amount for a yearly charge', () => {
+    expect(monthlyCost(Number.MAX_SAFE_INTEGER, 'yearly')).toBe(750_599_937_895_083);
+  });
+
+  it('rejects a weekly amount too large to convert exactly', () => {
+    expect(() => monthlyCost(Number.MAX_SAFE_INTEGER, 'weekly')).toThrow(RangeError);
+  });
