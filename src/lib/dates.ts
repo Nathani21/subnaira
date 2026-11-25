@@ -49,14 +49,32 @@ function dayNumber(year: number, month: number, day: number): number {
 }
 
 /**
+ * Checks whether a value is a real calendar date written as "YYYY-MM-DD" (from 1900 onwards).
+ *
+ * @param value - Anything, for example data read back from storage.
+ * @returns True for dates like "2026-01-31"; false for "2026-02-30", "26-1-1", numbers, null and so on.
+ */
+export function isIsoDate(value: unknown): value is IsoDate {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  try {
+    parse(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Converts a JavaScript Date to the calendar date the user sees on their phone.
  * Uses local time on purpose: `toISOString()` uses UTC, which is still yesterday
  * between midnight and 1am in Lagos.
- *
  * @param date - Any JavaScript Date, usually `new Date()`.
  * @returns The local calendar date as "YYYY-MM-DD".
  * @throws RangeError if the Date is invalid (for example `new Date('nonsense')`).
  */
+
 export function toIsoDate(date: Date): IsoDate {
   if (!Number.isFinite(date.getTime())) {
     throw new RangeError('Date is invalid');

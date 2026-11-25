@@ -1,4 +1,4 @@
-import { nextChargeDate, toIsoDate } from '../src/lib/dates';
+import { isIsoDate, nextChargeDate, toIsoDate } from '../src/lib/dates';
 
 describe('nextChargeDate', () => {
   it.each([
@@ -37,5 +37,15 @@ describe('toIsoDate', () => {
 
   it('rejects an invalid Date', () => {
     expect(() => toIsoDate(new Date(Number.NaN))).toThrow(RangeError);
+  });
+});
+
+describe('isIsoDate', () => {
+  it.each(['2026-01-31', '2028-02-29', '1900-01-01'])('accepts %s', (value) => {
+    expect(isIsoDate(value)).toBe(true);
+  });
+
+  it.each(['2026-02-30', '2026-1-5', '1899-12-31', 20260131, null, undefined])('rejects %p', (value) => {
+    expect(isIsoDate(value)).toBe(false);
   });
 });
