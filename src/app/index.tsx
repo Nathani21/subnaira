@@ -7,7 +7,6 @@ import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useSavedData } from '@/hooks/use-saved-data';
 import { useTheme } from '@/hooks/use-theme';
-import { toIsoDate } from '@/lib/dates';
 import { demoData } from '@/lib/demo';
 import { chargeLabel, cycleLabel, formatAmount } from '@/lib/labels';
 import { formatNaira } from '@/lib/money';
@@ -32,7 +31,7 @@ export default function HomeScreen() {
 }
 
 function Overview({ data, onTryDemo }: { data: SavedData; onTryDemo: () => void }) {
-  const today = toIsoDate(new Date());
+  const today = useToday();
   const result = useMemo((): { summary: Summary } | { error: string } => {
     try {
       return { summary: summarize(data, today) };
@@ -49,7 +48,7 @@ function Overview({ data, onTryDemo }: { data: SavedData; onTryDemo: () => void 
   if (summary.rows.length === 0) {
     return <EmptyState onTryDemo={onTryDemo} />;
   }
-  const leftOut = summary.rows.filter((row) => row.monthlyKobo === null).length;
+  const leftOut = summary.excludedCount;
 
   return (
     <>

@@ -27,11 +27,16 @@ describe('cycleLabel', () => {
 });
 
 describe('formatAmount', () => {
-  it('formats Naira from kobo', () => {
-    expect(formatAmount(1_900_000, 'NGN')).toBe('₦19,000.00');
+  it.each([
+    [1_900_000, 'NGN', '₦19,000.00'],
+    [0, 'NGN', '₦0.00'],
+    [1549, 'USD', '$15.49'],
+    [0, 'USD', '$0.00'],
+  ] as const)('formats %i in %s as %s', (amount, currency, expected) => {
+    expect(formatAmount(amount, currency)).toBe(expected);
   });
 
-  it('formats dollars from cents', () => {
-    expect(formatAmount(1549, 'USD')).toBe('$15.49');
+  it.each(['NGN', 'USD'] as const)('rejects a fraction of the smallest unit in %s', (currency) => {
+    expect(() => formatAmount(1.5, currency)).toThrow(RangeError);
   });
 });

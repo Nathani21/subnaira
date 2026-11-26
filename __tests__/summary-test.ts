@@ -35,7 +35,12 @@ function data(subscriptions: Subscription[], rateKoboPerDollar: number | null = 
 
 describe('summarize', () => {
   it('is empty with no subscriptions', () => {
-    expect(summarize(data([]), TODAY)).toEqual({ rows: [], totalMonthlyKobo: 0, missingRate: false });
+    expect(summarize(data([]), TODAY)).toEqual({
+      rows: [],
+      totalMonthlyKobo: 0,
+      missingRate: false,
+      excludedCount: 0,
+    });
   });
 
   it('sorts by next charge, soonest first', () => {
@@ -58,8 +63,14 @@ describe('summarize', () => {
   it('leaves dollar subscriptions out of the total until a rate is entered', () => {
     const summary = summarize(data([netflix, dstv], null), TODAY);
     expect(summary.missingRate).toBe(true);
+    expect(summary.excludedCount).toBe(1);
     expect(summary.totalMonthlyKobo).toBe(1_570_000);
     expect(summary.rows.find((row) => row.subscription.id === 'netflix')?.monthlyKobo).toBeNull();
+  });
+
+  it('counts every dollar subscription left out', () => {
+    const chatgpt = { ...netflix, id: 'chatgpt', name: 'ChatGPT Plus', amount: 2000 };
+    expect(summarize(data([netflix, chatgpt, dstv], null), TODAY).excludedCount).toBe(2);
   });
 
   it('does not need a rate when everything is in Naira', () => {
