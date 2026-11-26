@@ -22,6 +22,8 @@ export interface Summary {
   totalMonthlyKobo: number;
   /** True when dollar subscriptions are left out of the total because no exchange rate has been entered. */
   missingRate: boolean;
+  /** How many dollar subscriptions are left out of the total (0 when nothing is missing). */
+  excludedCount: number;
 }
 
 /**
@@ -32,17 +34,17 @@ export interface Summary {
  *
  * @param data - The saved data (rate and subscriptions).
  * @param today - Today's date, "YYYY-MM-DD" (passed in so the function is testable).
- * @returns The rows, the total, and whether a missing rate left anything out.
+ * @returns The rows, the total, and whether (and how many) subscriptions a missing rate left out.
  * @throws RangeError if a date is invalid, or an amount or the total is too large to calculate exactly.
  */
 export function summarize(data: SavedData, today: IsoDate): Summary {
   let totalMonthlyKobo = 0;
-  let missingRate = false;
+  let excludedCount = 0;
   const rows = data.subscriptions.map((subscription): SubscriptionRow => {
     const nextCharge = nextChargeDate(subscription.firstCharge, subscription.cycle, today);
     let monthlyKobo: number | null = null;
     if (subscription.currency === 'USD' && data.rateKoboPerDollar === null) {
-      missingRate = true;
+      excludedCount += 1;
     } else {
       const chargeKobo = toKobo(subscription.amount, subscription.currency, data.rateKoboPerDollar ?? 1);
       monthlyKobo = monthlyCost(chargeKobo, subscription.cycle);
@@ -56,5 +58,5 @@ export function summarize(data: SavedData, today: IsoDate): Summary {
   rows.sort(
     (a, b) => a.daysUntil - b.daysUntil || a.subscription.name.localeCompare(b.subscription.name),
   );
-  return { rows, totalMonthlyKobo, missingRate };
+  return { rows, totalMonthlyKobo, missingRate: excludedCount > 0, excludedCount };
 }

@@ -83,6 +83,21 @@ export function toIsoDate(date: Date): IsoDate {
 }
 
 /**
+ * Counts the milliseconds from a moment until the next local midnight, so a screen can update its date then.
+ *
+ * @param now - The current moment, usually `new Date()`.
+ * @returns Milliseconds until the next midnight on the phone's clock (a full day if `now` is exactly midnight).
+ * @throws RangeError if `now` is an invalid Date.
+ */
+export function msUntilNextMidnight(now: Date): number {
+  if (!Number.isFinite(now.getTime())) {
+    throw new RangeError('Date is invalid');
+  }
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return nextMidnight.getTime() - now.getTime();
+}
+
+/**
  * Counts the days from one calendar date to another: 1 for tomorrow, 0 for the same day, -1 for yesterday.
  *
  * @param from - The starting date, "YYYY-MM-DD", usually today.
