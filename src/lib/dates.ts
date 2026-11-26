@@ -83,6 +83,18 @@ export function toIsoDate(date: Date): IsoDate {
 }
 
 /**
+ * Counts the days from one calendar date to another: 1 for tomorrow, 0 for the same day, -1 for yesterday.
+ *
+ * @param from - The starting date, "YYYY-MM-DD", usually today.
+ * @param to - The other date, "YYYY-MM-DD".
+ * @returns Whole days from `from` to `to` (negative if `to` is earlier).
+ * @throws RangeError if either date is not a real "YYYY-MM-DD" date, or is before 1900.
+ */
+export function daysBetween(from: IsoDate, to: IsoDate): number {
+  return dayNumber(...parse(to)) - dayNumber(...parse(from));
+}
+
+/**
  * Works out the next date a subscription charges, on or after today.
  *
  * Month-based cycles keep the day of the first charge where the month allows it:
