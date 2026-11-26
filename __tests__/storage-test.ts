@@ -41,4 +41,13 @@ describe('storage', () => {
     await expect(saveData({ ...data, rateKoboPerDollar: -1 })).rejects.toThrow(RangeError);
     await expect(loadData()).resolves.toEqual(data);
   });
+  
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    'refuses a %p exchange rate instead of saving it as null',
+    async (rate) => {
+      await saveData(data);
+      await expect(saveData({ ...data, rateKoboPerDollar: rate })).rejects.toThrow(RangeError);
+      await expect(loadData()).resolves.toEqual(data);
+    },
+  );
 });

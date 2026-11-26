@@ -25,6 +25,12 @@ export async function loadData(): Promise<SavedData> {
  * @throws RangeError if the data is invalid (nothing is written). Errors from the storage itself are passed on.
  */
 export async function saveData(data: SavedData): Promise<void> {
+  // Checked before serializing: JSON.stringify quietly turns NaN and Infinity into null,
+  // and null is a valid rate ("not entered yet"), so the check after would miss them.
+  const rate = data.rateKoboPerDollar;
+  if (rate !== null && (!Number.isSafeInteger(rate) || rate <= 0)) {
+    throw new RangeError('Exchange rate must be null or a whole, positive number of kobo');
+  }
   const json = serializeSavedData(data);
   parseSavedData(json);
   await AsyncStorage.setItem(STORAGE_KEY, json);
