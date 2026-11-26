@@ -14,20 +14,18 @@ export function useToday(): IsoDate {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const refresh = () => setToday(toIsoDate(new Date()));
-    const scheduleNext = () => {
+    // One clock reading per update, so the stored date and the timer delay always agree.
+    const sync = () => {
+      const now = new Date();
+      setToday(toIsoDate(now));
       clearTimeout(timer);
       // One second after midnight, so the clock has definitely moved to the new day.
-      timer = setTimeout(() => {
-        refresh();
-        scheduleNext();
-      }, msUntilNextMidnight(new Date()) + 1000);
+      timer = setTimeout(sync, msUntilNextMidnight(now) + 1000);
     };
-    scheduleNext();
+    sync();
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
-        refresh();
-        scheduleNext();
+        sync();
       }
     });
     return () => {
