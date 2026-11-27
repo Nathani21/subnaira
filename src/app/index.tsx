@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useSavedData } from '@/hooks/use-saved-data';
 import { useTheme } from '@/hooks/use-theme';
+import { useToday } from '@/hooks/use-today';
 import { demoData } from '@/lib/demo';
 import { chargeLabel, cycleLabel, formatAmount } from '@/lib/labels';
 import { formatNaira } from '@/lib/money';
