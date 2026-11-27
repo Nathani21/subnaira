@@ -12,6 +12,9 @@ import { chargeLabel, cycleLabel, formatAmount } from '@/lib/labels';
 import { formatNaira } from '@/lib/money';
 import type { SavedData } from '@/lib/subscriptions';
 
+/** Either a chart ready to draw (with the size it was laid out for), or a message saying why not. */
+type ChartResult = { chart: BubbleChartData; width: number; height: number } | { error: string };
+
 /** Draws every subscription as a bubble, with a details card for the tapped one. */
 export function BubbleChart({ data }: { data: SavedData }) {
   const today = useToday();
@@ -19,7 +22,7 @@ export function BubbleChart({ data }: { data: SavedData }) {
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const result = useMemo(() => {
+  const result = useMemo((): ChartResult | null => {
     if (size === null) {
       return null;
     }
