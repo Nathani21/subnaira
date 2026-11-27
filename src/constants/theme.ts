@@ -63,3 +63,10 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+
+/** Bubble fill colours by currency. Dark enough for white text in light and dark mode. */
+export const BubbleColors = {
+  NGN: '#15803d',
+  USD: '#1d4ed8',
+} as const;
