@@ -7,7 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BubbleColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useToday } from '@/hooks/use-today';
-import { type ChartBubble, type PricedRow, prepareBubbleChart } from '@/lib/bubble-chart';
+import { type BubbleChartData, type ChartBubble, type PricedRow, prepareBubbleChart } from '@/lib/bubble-chart';
 import { chargeLabel, cycleLabel, formatAmount } from '@/lib/labels';
 import { formatNaira } from '@/lib/money';
 import type { SavedData } from '@/lib/subscriptions';
