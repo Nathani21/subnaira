@@ -27,6 +27,19 @@ describe('bubbleLabel', () => {
     expect(bubbleLabel('Mobile data', 1_516_667, 36).title).toBe('Mobile…');
   });
 
+    it('shows nothing in a zero-size bubble', () => {
+    expect(bubbleLabel('DStv', 1_900_000, 0)).toEqual({ title: null, amount: null });
+  });
+
+  it('labels a free subscription with a zero amount', () => {
+    expect(bubbleLabel('Free trial', 0, 80)).toEqual({ title: 'Free trial', amount: '₦0.00' });
+  });
+
+  it('rounds the short amount half up', () => {
+    // ₦1,005 is 1.005 thousand → ₦1.01K.
+    expect(bubbleLabel('DStv', 100_500, 80).amount).toBe('₦1.01K');
+  });
+  
   it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])('rejects the radius %p', (radius) => {
     expect(() => bubbleLabel('DStv', 1_900_000, radius)).toThrow(RangeError);
   });
