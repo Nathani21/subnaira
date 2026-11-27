@@ -17,7 +17,7 @@ describe('nextChargeDate', () => {
     ['2026-01-01', 'weekly', '2026-01-08', '2026-01-08', 'weekly charge due today'],
     ['2026-01-01', 'weekly', '2026-01-09', '2026-01-15', 'weekly moves 7 days on'],
     ['2026-12-28', 'weekly', '2027-01-01', '2027-01-04', 'weekly across the new year'],
-  ] as const)('%s %s, today %s → %s (%s)', (first, cycle, today, expected) => {
+  ] as const)('%s %s, today %s → %s (%s)', (first, cycle, today, expected, _description) => {
     expect(nextChargeDate(first, cycle, today)).toBe(expected);
   });
 

@@ -51,6 +51,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
+    "typecheck": "tsc --noEmit",
     "test:watch": "jest --watchAll",
     "lint": "expo lint"
   },

@@ -116,7 +116,7 @@ describe('layoutBubbles', () => {
     [{ gap: Number.NaN }, 'gap that is not a number'],
     [{ minRadius: -1 }, 'negative minimum radius'],
     [{ minRadius: Number.POSITIVE_INFINITY }, 'infinite minimum radius'],
-  ])('rejects the option %j (%s)', (options) => {
+  ])('rejects the option %j (%s)', (options, _reason) => {
     expect(() => layoutBubbles([{ id: 'a', monthlyKobo: 100 }], 360, 360, options)).toThrow(RangeError);
   });
 
